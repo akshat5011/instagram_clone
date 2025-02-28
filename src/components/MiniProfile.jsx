@@ -10,7 +10,9 @@ export default function MiniProfile() {
         <h2 className="font-bold ">akshat</h2>
         <h3 className="text-sm text-gray-40">Welcome to Instone!!</h3>
       </div>
-      <button className="font-semibold text-blue-400 text-sm cursor-pointer">Sign Out</button>
+      <button className="font-semibold text-blue-400 text-sm cursor-pointer">
+        Sign Out
+      </button>
     </div>
   );
 }

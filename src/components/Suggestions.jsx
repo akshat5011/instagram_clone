@@ -21,11 +21,20 @@ export default function Suggestions() {
         <button className="text-gray-600 font-semibold">See All</button>
       </div>
       {suggestions.map((suggestion) => (
-        <div key={suggestion.id} className="flex justify-between items-center mt-3">
-          <img src={suggestion.pfp} alt={suggestion.name} className="h-14 rounded-full border p-[2px]" />
+        <div
+          key={suggestion.id}
+          className="flex justify-between items-center mt-3"
+        >
+          <img
+            src={suggestion.pfp}
+            alt={suggestion.name}
+            className="h-14 rounded-full border p-[2px]"
+          />
           <div className="flex-1 ml-4">
             <h2 className="font-semibold text-sm">{suggestion.name}</h2>
-            <h3 className="text-sm text-gray-400 truncate w-[230px]">{suggestion.jobtitle}</h3>
+            <h3 className="text-sm text-gray-400 truncate w-[230px]">
+              {suggestion.jobtitle}
+            </h3>
           </div>
           <button className="font-semibold text-blue-400 text-sm">
             Follow

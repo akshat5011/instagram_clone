@@ -20,7 +20,7 @@ export default function Feed() {
           <MiniProfile />
 
           {/* Suggestions */}
-          <Suggestions/>
+          <Suggestions />
         </div>
       </section>
     </main>
