@@ -29,14 +29,14 @@ export default function Header() {
       </div>
 
       {/* Middle */}
-      <div className="relative ">
+      <div className="relative">
         <div className="absolute top-2 left-2">
           <MagnifyingGlassIcon className="h-5 text-gray-500" />
         </div>
         <input
           type="text"
           placeholder="Search"
-          className="bg-gray-50 h-7 pl-10 p-4 border-2 border-gray-500 text-base focus:ring-black focus:border-black rounded-md"
+          className="bg-gray-50 h-7 pl-10 p-4 max-sm:w-[200px] border-2 border-gray-500 text-base focus:ring-black focus:border-black rounded-md"
         />
       </div>
 
