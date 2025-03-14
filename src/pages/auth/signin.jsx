@@ -1,11 +1,12 @@
 import Header from "@/components/Header";
 import { getProviders, signIn } from "next-auth/react";
 import "@/app/globals.css";
+import { AuthProvider } from "@/components/AuthProvider";
 
 export default function signin({ providers }) {
   return (
     <>
-      <Header />
+      <AuthProvider> <Header /> </AuthProvider>
       <div className="flex justify-center space-x-7 mt-20">
         <img
           className="hidden object-cover rotate-6 md:inline-flex md:w-96"
