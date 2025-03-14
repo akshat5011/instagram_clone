@@ -60,7 +60,7 @@ export default function Header() {
             </>
           ) : (
             <>
-              <button onClick={signIn}>Sign in</button>
+              <button onClick={signIn} className="cursor-pointer" >Sign in</button>
             </>
           )}
         </div>
