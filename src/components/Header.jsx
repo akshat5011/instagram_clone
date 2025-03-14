@@ -7,9 +7,12 @@ import {
 } from "@heroicons/react/24/outline";
 import { HomeModernIcon } from "@heroicons/react/24/solid";
 import { signIn, signOut, useSession } from "next-auth/react";
+import { useDispatch } from "react-redux";
+import { openModal } from "@/store/modalSlice";
 
 export default function Header() {
   const { data: session } = useSession();
+  const dispatch = useDispatch();
   return (
     <div className="shadow-sm border-b sticky top-0 bg-white z-30">
       <div className="flex items-center justify-between max-w-6xl mx-4 xl:mx-auto">
@@ -48,7 +51,10 @@ export default function Header() {
           <HomeModernIcon className="hidden md:inline-flex  h-6 cursor-pointer hover:scale-125 transition-tranform duration-200 ease-out" />
           {session ? (
             <>
-              <PlusCircleIcon className="h-6 cursor-pointer hover:scale-125 transition-tranform duration-200 ease-out" />
+              <PlusCircleIcon
+                onClick={() => dispatch(openModal())}
+                className="h-6 cursor-pointer hover:scale-125 transition-tranform duration-200 ease-out"
+              />
               <img
                 onClick={signOut}
                 src={
@@ -60,7 +66,9 @@ export default function Header() {
             </>
           ) : (
             <>
-              <button onClick={signIn} className="cursor-pointer" >Sign in</button>
+              <button onClick={signIn} className="cursor-pointer">
+                Sign in
+              </button>
             </>
           )}
         </div>
