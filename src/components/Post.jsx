@@ -5,14 +5,21 @@ import {
   HeartIcon,
   PaperAirplaneIcon,
 } from "@heroicons/react/24/outline";
-import { EllipsisHorizontalIcon } from "@heroicons/react/24/solid";
+import {
+  EllipsisHorizontalIcon,
+  HeartIcon as HeartIconFilled,
+} from "@heroicons/react/24/solid";
 import {
   addDoc,
   collection,
+  deleteDoc,
+  doc,
   onSnapshot,
   orderBy,
   query,
   serverTimestamp,
+  setDoc,
+  snapshotEqual,
 } from "firebase/firestore";
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
@@ -26,6 +33,8 @@ export default function Post({ id, username, userPfp, postImg, caption }) {
   const { data: session } = useSession();
   const [comment, setComment] = useState("");
   const [comments, setComments] = useState([]);
+  const [likes, setLikes] = useState([]);
+  const [hadliked, setHadLiked] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -57,6 +66,32 @@ export default function Post({ id, username, userPfp, postImg, caption }) {
     });
   }
 
+  useEffect(() => {
+    const unsubscribe = onSnapshot(
+      collection(db, "posts", id, "likes"),
+      (snapshot) => {
+        setLikes(snapshot.docs);
+      }
+    );
+  }, [db]);
+
+  useEffect(() => {
+    setHadLiked(
+      likes.findIndex((like) => like.id === session?.user.uid) !== -1
+    );
+  }, [likes]);
+
+  async function likedPost() {
+    if (hadliked) {
+      // if had already liked and clicked on heart then dislike otherwise likes
+      await deleteDoc(doc(db, "posts", id, "likes", session.user.uid));
+    } else {
+      await setDoc(doc(db, "posts", id, "likes", session.user.uid), {
+        username: session.user.username,
+      });
+    }
+  }
+
   return (
     <div className="bg-white my-7 border rounded-md">
       {/* Post Header */}
@@ -77,7 +112,17 @@ export default function Post({ id, username, userPfp, postImg, caption }) {
       {session && (
         <div className="flex justify-between px-4 pt-4">
           <div className="flex space-x-4">
-            <HeartIcon className="btn" />
+            {hadliked ? (
+              <HeartIconFilled
+                onClick={likedPost}
+                className="btn text-red-500"
+              />
+            ) : (
+              <HeartIcon onClick={likedPost} className="btn" />
+            )}
+            {likes.length > 0 && (
+              <p className="font-bold mb-1">{likes.length}</p>
+            )}
             <ChatBubbleOvalLeftIcon className="btn" />
             <PaperAirplaneIcon className="btn" />
           </div>
