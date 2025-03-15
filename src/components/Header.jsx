@@ -9,10 +9,12 @@ import { HomeModernIcon } from "@heroicons/react/24/solid";
 import { signIn, signOut, useSession } from "next-auth/react";
 import { useDispatch } from "react-redux";
 import { openModal } from "@/store/modalSlice";
+import { useRouter } from "next/navigation";
 
 export default function Header() {
   const { data: session } = useSession();
   const dispatch = useDispatch();
+  const router = useRouter();
   return (
     <div className="shadow-sm border-b sticky top-0 bg-white z-30">
       <div className="flex items-center justify-between max-w-6xl mx-4 xl:mx-auto">
@@ -23,6 +25,7 @@ export default function Header() {
             fill
             alt="Instone"
             className="object-contain"
+            onClick={() => router.push("/")}
           />
         </div>
         <div className="cursor-pointer h-24 w-10 relative  lg:hidden">
@@ -31,6 +34,7 @@ export default function Header() {
             fill
             alt="Insto LOGO"
             className="object-contain"
+            onClick={() => router.push("/")}
           />
         </div>
 
@@ -48,7 +52,10 @@ export default function Header() {
 
         {/* Right */}
         <div className="flex space-x-4 items-center">
-          <HomeModernIcon className="hidden md:inline-flex  h-6 cursor-pointer hover:scale-125 transition-tranform duration-200 ease-out" />
+          <HomeModernIcon
+            className="hidden md:inline-flex  h-6 cursor-pointer hover:scale-125 transition-tranform duration-200 ease-out"
+            onClick={() => router.push("/")}
+          />
           {session ? (
             <>
               <PlusCircleIcon
