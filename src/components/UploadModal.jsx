@@ -41,31 +41,51 @@ export default function UploadModal() {
     };
   }
 
+  async function uploadToCloudinary(imageBase64) {
+    const cloudinaryUrl = `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload`;
+
+    const formData = new FormData();
+    formData.append("file", imageBase64);
+    formData.append(
+      "upload_preset",
+      process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET
+    );
+
+    const response = await fetch(cloudinaryUrl, {
+      method: "POST",
+      body: formData,
+    });
+
+    const data = await response.json();
+    return data.secure_url;
+  }
+
   async function uploadPost() {
     if (loading) return;
 
     setLoading(true);
 
-    const docRef = await addDoc(collection(db, "posts"), {
-      caption: captionRef.current.value,
-      username: session.user.username,
-      profileImg: session.user.image,
-      timestamp: serverTimestamp(),
-    });
-    const imageRef = ref(storage, `posts/${docRef.id}/image`);
-    await uploadString(imageRef, selectedFile, "data_url").then(
-      async (snapshot) => {
-        const downloadUrl = await getDownloadURL(imageRef);
-        await updateDoc(doc(db, "posts", docRef.id), {
-          image: downloadUrl,
-        });
-      }
-    );
-    setLoading(false);
-    setSelectedFile(null);
-    dispatch(closeModal());
-  }
+    try {
+      // Upload to Cloudinary first
+      const imageUrl = await uploadToCloudinary(selectedFile);
 
+      // Save to Firebase Firestore
+      await addDoc(collection(db, "posts"), {
+        caption: captionRef.current.value,
+        username: session.user.username,
+        profileImg: session.user.image,
+        timestamp: serverTimestamp(),
+        image: imageUrl,
+      });
+
+      setSelectedFile(null);
+      dispatch(closeModal());
+    } catch (error) {
+      console.error("Upload error:", error);
+    }
+
+    setLoading(false);
+  }
   return (
     <div>
       {isOpen && (
@@ -100,7 +120,7 @@ export default function UploadModal() {
             <input
               type="text"
               maxLength={150}
-              placeholder="Please Enter you Caption.."
+              placeholder="Please Enter your Caption.."
               className="m-4 border-none text-center w-full focus:ring-0"
               ref={captionRef}
             />
@@ -109,7 +129,7 @@ export default function UploadModal() {
               disabled={!selectedFile || loading}
               className="w-full bg-red-600 text-white p-2 shadow-md hover:brightness-125 disabled:bg-gray-200 disabled:cursor-not-allowed disabled:hover:brightness-100"
             >
-              Upload Post
+              {loading ? "Uploading..." : "Upload Post"}
             </button>
           </div>
         </ReactModal>
