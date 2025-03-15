@@ -6,17 +6,46 @@ import {
   PaperAirplaneIcon,
 } from "@heroicons/react/24/outline";
 import { EllipsisHorizontalIcon } from "@heroicons/react/24/solid";
-import { addDoc, collection, serverTimestamp } from "firebase/firestore";
+import {
+  addDoc,
+  collection,
+  onSnapshot,
+  orderBy,
+  query,
+  serverTimestamp,
+} from "firebase/firestore";
 import { useSession } from "next-auth/react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { db } from "../../firebase";
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
+
+dayjs.extend(relativeTime);
 
 export default function Post({ id, username, userPfp, postImg, caption }) {
   const { data: session } = useSession();
   const [comment, setComment] = useState("");
+  const [comments, setComments] = useState([]);
+
+  useEffect(() => {
+    if (!id) return;
+
+    const q = query(
+      collection(db, "posts", id, "comments"),
+      orderBy("timestamp", "desc")
+    );
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      setComments(snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })));
+    });
+
+    return () => unsubscribe();
+  }, [id]);
 
   async function postCommentToFirebase(event) {
     event.preventDefault();
+    if (!session) return;
+
     const commentToSend = comment;
     setComment("");
 
@@ -27,12 +56,13 @@ export default function Post({ id, username, userPfp, postImg, caption }) {
       timestamp: serverTimestamp(),
     });
   }
+
   return (
     <div className="bg-white my-7 border rounded-md">
       {/* Post Header */}
       <div className="flex items-center p-5">
         <img
-          src={userPfp ? userPfp : "/defaultPfp.png"}
+          src={userPfp || "/defaultPfp.png"}
           alt={username}
           className="rounded-full h-12 object-cover border p-1 mr-3"
         />
@@ -43,7 +73,7 @@ export default function Post({ id, username, userPfp, postImg, caption }) {
       {/* Post Image */}
       <img className="object-cover w-full" src={postImg} alt="" />
 
-      {/* Post Buttons  */}
+      {/* Post Buttons */}
       {session && (
         <div className="flex justify-between px-4 pt-4">
           <div className="flex space-x-4">
@@ -55,12 +85,34 @@ export default function Post({ id, username, userPfp, postImg, caption }) {
         </div>
       )}
 
-      {/* Post comments */}
+      {/* Post Caption */}
       <p className="truncate pt-5 pb-3 px-5">
-        <span className="font-bold mr-2">{username}</span> {caption}{" "}
+        <span className="font-bold mr-2">{username}</span> {caption}
       </p>
 
-      {/* Post input box */}
+      {/* Comments Section */}
+      {comments.length > 0 && (
+        <div className="mx-10 max-h-24 overflow-y-scroll scrollbar-none">
+          {comments.map((comment, index) => (
+            <div key={index} className="flex items-center space-x-2 mb-2">
+              <img
+                src={comment.userPfp || "/defaultPfp.png"}
+                className="h-7 rounded-full object-cover"
+                alt="userpfp"
+              />
+              <p className="font-semibold">{comment.username}</p>
+              <p className="flex-1 truncate">{comment.comment}</p>
+              <p className="text-gray-400 text-xs">
+                {comment.timestamp
+                  ? dayjs(comment.timestamp.toDate()).fromNow()
+                  : "Just now"}
+              </p>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Post Comment Input */}
       {session && (
         <form className="flex items-center p-4">
           <FaceSmileIcon className="h-7" />
